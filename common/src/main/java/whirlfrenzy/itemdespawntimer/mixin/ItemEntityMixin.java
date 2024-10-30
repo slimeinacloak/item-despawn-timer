@@ -28,7 +28,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityA
     @Shadow public abstract ItemStack getStack();
 
     @Unique
-    boolean item_despawn_timer$timerLabelVisibility = true;
+    boolean item_despawn_timer$labelVisibility = true;
 
     // Only used on the server in the tick mixin below
     @Unique
@@ -50,12 +50,12 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityA
 
     @Override
     public boolean item_despawn_timer$getLabelVisibility() {
-        return this.item_despawn_timer$timerLabelVisibility;
+        return this.item_despawn_timer$labelVisibility;
     }
 
     @Override
     public void item_despawn_timer$setLabelVisibility(boolean visible) {
-        this.item_despawn_timer$timerLabelVisibility = visible;
+        this.item_despawn_timer$labelVisibility = visible;
     }
 
     @Override

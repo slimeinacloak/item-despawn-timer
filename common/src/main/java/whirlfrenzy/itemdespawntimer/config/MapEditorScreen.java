@@ -211,7 +211,7 @@ public class MapEditorScreen extends Screen {
             } else {
                 this.representingItem = new ItemStack(Registries.ITEM.get(this.entry.getKey()));
 
-                this.itemName = new TextWidget(0, 0, this.screenWidth / 2 - 30, 25, Text.translatable(this.representingItem.getTranslationKey()), this.client.textRenderer);
+                this.itemName = new TextWidget(0, 0, this.screenWidth / 2 - 30, 25, this.representingItem.getItemName(), this.client.textRenderer);
                 this.itemName.alignRight();
 
                 this.valueTextField.setTextPredicate(text -> {

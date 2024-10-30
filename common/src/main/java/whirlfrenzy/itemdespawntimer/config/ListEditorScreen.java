@@ -141,7 +141,7 @@ public class ListEditorScreen extends Screen {
             } else {
                 this.representingItem = new ItemStack(Registries.ITEM.get(identifier));
 
-                this.itemName = new TextWidget(this.parentList.getWidth() / 2 - 70, 0, 135, 25, Text.translatable(this.representingItem.getTranslationKey()), this.client.textRenderer);
+                this.itemName = new TextWidget(this.parentList.getWidth() / 2 - 70, 0, 135, 25, this.representingItem.getItemName(), this.client.textRenderer);
                 this.itemName.alignLeft();
             }
 

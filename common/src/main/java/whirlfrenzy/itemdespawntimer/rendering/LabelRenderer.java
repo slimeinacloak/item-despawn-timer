@@ -3,7 +3,9 @@ package whirlfrenzy.itemdespawntimer.rendering;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.entity.state.ItemEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EntityAttachmentType;
@@ -18,14 +20,16 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import whirlfrenzy.itemdespawntimer.ItemDespawnTimer;
 import whirlfrenzy.itemdespawntimer.access.ItemEntityAccessInterface;
+import whirlfrenzy.itemdespawntimer.access.ItemEntityRenderStateAccessInterface;
 import whirlfrenzy.itemdespawntimer.config.ItemDespawnTimerClientConfig;
 
 public class LabelRenderer {
-    public static void renderTextLabels(ItemEntity itemEntity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int lightLevel) {
-        if(!((ItemEntityAccessInterface)itemEntity).item_despawn_timer$getLabelVisibility()) return;
+    // TODO: use mixin to create additional fields in the ItemEntityRenderState class to pass along label visibility and the tracked item age values
+    public static void renderTextLabels(ItemEntityRenderState renderState, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int lightLevel) {
+        if(!((ItemEntityRenderStateAccessInterface)renderState).item_despawn_timer$getLabelVisibility()) return;
 
         if(ItemDespawnTimerClientConfig.useWhitelist){
-            Identifier itemId = Registries.ITEM.getId(itemEntity.getStack().getItem());
+            Identifier itemId = Registries.ITEM.getId(renderState.stack.getItem());
             if(ItemDespawnTimerClientConfig.whitelistIsBlacklist){
                 if(ItemDespawnTimerClientConfig.whitelistedItems.contains(itemId)) return;
             } else {
@@ -35,7 +39,7 @@ public class LabelRenderer {
 
         // TODO: Investigate ItemEntity as well as other transparency effects not rendering behind the label
 
-        Vec3d labelPosition = itemEntity.getAttachments().getPointNullable(EntityAttachmentType.NAME_TAG, 0, itemEntity.getYaw());
+        Vec3d labelPosition = renderState.nameLabelPos;
         if(labelPosition == null){
             labelPosition = new Vec3d(0,0,0);
         }
@@ -45,8 +49,8 @@ public class LabelRenderer {
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
         if(ItemDespawnTimerClientConfig.timerVisible){
-            int modItemAge = ((ItemEntityAccessInterface)itemEntity).item_despawn_timer$getModItemAge();
-            int remainingSeconds = Math.max(0, ((int)Math.ceil(((float) ((ItemEntityAccessInterface)itemEntity).item_despawn_timer$getOverriddenLifespanOrModItemLifespan() - (float) modItemAge) / 20)));
+            int modItemAge = ((ItemEntityRenderStateAccessInterface)renderState).item_despawn_timer$getModItemAge();
+            int remainingSeconds = Math.max(0, ((int)Math.ceil(((float) ((ItemEntityRenderStateAccessInterface)renderState).item_despawn_timer$getModItemLifespan() - (float) modItemAge) / 20)));
 
             Text text;
 
@@ -66,11 +70,11 @@ public class LabelRenderer {
         }
 
         if(ItemDespawnTimerClientConfig.nameVisible){
-            MutableText name = itemEntity.getStack().getName().copy();
+            MutableText name = renderState.stack.getName().copy();
 
             if(ItemDespawnTimerClientConfig.applyFormattingToNameLabel) {
-                name.formatted(itemEntity.getStack().getRarity().getFormatting());
-                if (itemEntity.getStack().contains(DataComponentTypes.CUSTOM_NAME)) {
+                name.formatted(renderState.stack.getRarity().getFormatting());
+                if (renderState.stack.contains(DataComponentTypes.CUSTOM_NAME)) {
                     name.formatted(Formatting.ITALIC);
                 }
             }
@@ -108,7 +112,7 @@ public class LabelRenderer {
         buffer.vertex(matrix4f, 7,7,0).color(1.0F,1.0F,1.0F,1.0F).texture(1.0F, 1.0F);
         buffer.vertex(matrix4f, 7,0,0).color(1.0F,1.0F,0F,1.0F).texture(1.0F, 0.0F);
 
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX); //GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, ItemDespawnTimer.identifier("clock.png"));
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
